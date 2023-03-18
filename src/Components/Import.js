@@ -1,14 +1,22 @@
 import { useEffect, useState } from 'react';
+
+import { Button, CircularProgress, OutlinedInput, Stack } from '@mui/material';
+
 import Papa from "papaparse";
+import Cookies from 'js-cookie';
+
+import { motion } from 'framer-motion';
+
+import '../App.css';
 
 const allowedExtensions = ["csv"];
 
 function Import() {
     const [data, setData] = useState([]);
     const [file, setFile] = useState(null);
+    const [loaded, setLoaded] = useState(true);
 
     const handleFileChange = (event) => {
-
         if (event.target.files.length) {
             const inputFile = event.target.files[0];
 
@@ -22,21 +30,72 @@ function Import() {
         }
     }
 
-    const getData = () => {
+    const importData = () => {
         if (!file) return alert('There is no file');
-
+        setLoaded(false);
         const reader = new FileReader();
 
         reader.onload = async ({ target }) => {
             const csv = Papa.parse(target.result, { header: true });
             const parsedData = csv?.data;
-            setData(parsedData);
+            if (parsedData.length <= 501) {
+                setData(parsedData);
+            } else if (Cookies.get('role') !== "ADMIN") {
+                setLoaded(true);
+                alert('Dataset size is too large for your role.');
+            } else {
+                setData(parsedData);
+            }
         }
         reader.readAsText(file);
     }
 
     const sendJourneys = (localData) => {
-        console.log(localData)
+        fetch('http://localhost:8080/sendjourneys', {
+            method: 'POST',
+            headers: Cookies.get('role') !== 'ADMIN' ? {
+                'Content-Type': 'application/json'
+            } : {
+                'Content-Type': 'application/json',
+                'Authorization': Cookies.get('jwt')
+            },
+            body: JSON.stringify(localData)
+        })
+            .then(response => {
+                setLoaded(true);
+                setFile(null);
+                if (response.status === 200) {
+                    alert('OK');
+                } else if (response.status === 202) {
+                    alert('Not all rows were added.');
+                } else {
+                    alert('Something went wrong during adding the book');
+                }
+            })
+            .catch(err => console.error(err));
+    }
+
+    const sendStations = (localData) => {
+        fetch('http://localhost:8080/sendstations', {
+            method: 'POST',
+            headers: Cookies.get('role') !== 'ADMIN' ? {
+                'Content-Type': 'application/json'
+            } : {
+                'Content-Type': 'application/json',
+                'Authorization': Cookies.get('jwt')
+            },
+            body: JSON.stringify(localData)
+        })
+            .then(response => {
+                setLoaded(true);
+                setFile(null);
+                if (response.ok) {
+                    alert('OK');
+                } else {
+                    alert('Something went wrong during adding the book');
+                }
+            })
+            .catch(err => console.error(err));
     }
 
     useEffect(() => {
@@ -48,8 +107,7 @@ function Import() {
                         localData.push({ id: parseInt(data[i].ID), name: data[i].Name, address: data[i].Osoite, city: data[i].Kaupunki === 'Espoo' ? 'Espoo' : 'Helsinki', operator: data[i].Operaattor !== ' ' ? data[i].Operaattor : null, latitude: data[i].x, longitude: data[i].y });
                     }
                 }
-                //sendStations();
-                console.log(localData);
+                sendStations(localData);
             } else if (data[0].Departure !== undefined) {
                 for (let i = 0; i < data.length; i++) {
                     if (data[i]['Duration (sec.)'] >= 10 && data[i]['Covered distance (m)'] >= 10 && !isNaN(parseInt(data[i]['Departure station id'])) && !isNaN(parseInt(data[i]['Return station id']))) {
@@ -57,25 +115,31 @@ function Import() {
                     }
                 }
                 sendJourneys(localData);
+            } else {
+                setLoaded(true);
+                alert('The dataset is unacceptable');
             }
         }
     }, [data]);
 
     return (
-        <div>
-            <label htmlFor="csvInput" style={{ display: "block" }}>
-                Enter CSV File
-            </label>
-            <input
-                onChange={handleFileChange}
-                id="csvInput"
-                name="file"
-                type="File"
-            />
-            <div>
-                <button onClick={getData}>Get Data</button>
-            </div>
-        </div>
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+        >
+            {loaded && <Stack alignItems='center' marginTop='20vh' marginBottom='55vh' spacing={2} >
+                <div className='App'>{Cookies.get('role') === 'ADMIN' ? 'Please select csv file' : 'Please select csv file with no more than 500 rows.'}</div>
+                <OutlinedInput
+                    sx={{ width: '300px' }}
+                    color='thirdary'
+                    type="file"
+                    onChange={handleFileChange}
+                />
+                <Button sx={{ width: '150px' }} color='fourth' variant='text' onClick={importData}>Import Data</Button>
+            </Stack >}
+            {!loaded && <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', marginTop: '20vh', marginBottom: '55vh' }}><CircularProgress color="fourth" /></div>}
+        </motion.div>
     );
 }
 
