@@ -1,15 +1,27 @@
-import { Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { Button, Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Snackbar, Toolbar, Typography } from '@mui/material';
+import { forwardRef, useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import PublishIcon from '@mui/icons-material/Publish';
+import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import TourIcon from '@mui/icons-material/Tour';
 import MenuIcon from '@mui/icons-material/Menu';
+import LoginIcon from '@mui/icons-material/Login';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 import MuiAppBar from '@mui/material/AppBar';
+import MuiAlert from '@mui/material/Alert';
 
 import AppRoutes from './Routes/AppRoutes';
 import styled from '@emotion/styled';
+import AuthContext from './context/AuthContext';
+import Login from './Components/Login';
+import Cookies from 'js-cookie';
+
+const Alert = forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const DrawerHeader = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -28,11 +40,15 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
 );
 
 const drawerWidth = 240;
-const pages = ['Import'];
-const adminPages = [];
+const pages = ['Journeys', 'Stations'];
+const additionalPages = ['Import Data'];
 
 function App() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [openLogin, setOpenLogin] = useState(false);
+
+  const { isAlert, setIsAlert, alertType, setAlertType, alertMsg, setAlertMsg } = useContext(AuthContext);
+
   const handleDrawerOpen = () => {
     setDrawerOpen(true);
   }
@@ -42,11 +58,22 @@ function App() {
   }
 
   const setLink = (value) => {
-    if (value === 'Import') {
+    if (value === 'Import Data') {
+      return '/import';
+    } else if (value === 'Journeys') {
       return '/';
+    } else if (value === 'Stations') {
+      return '/stations';
     }
   }
   const navigate = useNavigate();
+
+  const logOff = () => {
+    Cookies.remove('role');
+    Cookies.remove('jwt');
+    Cookies.remove('username');
+    if ([Cookies.get('role'), Cookies.get('jwt'), Cookies.get('username')].every(value => value === undefined)) window.location.reload();
+  }
 
   return (
     <div>
@@ -64,8 +91,20 @@ function App() {
             </IconButton>
           </div>
           <Typography onClick={() => navigate("/")} style={{ cursor: 'pointer' }} variant='h5' component="div">
-            Home
+            City Bike
           </Typography>
+          <div style={{ position: 'absolute', right: 25 }}>
+            {(Cookies.get('username') === undefined) && <Button size='medium' onClick={() => setOpenLogin(true)} startIcon={<LoginIcon />} color="inherit">
+              Login
+            </Button>}
+            {(Cookies.get('username') !== undefined) && <div style={{ display: 'flex', gap: 10 }}>
+              <Typography variant='h6'>{Cookies.get('username')}</Typography>
+              <IconButton size='small' onClick={logOff}>
+                <LogoutIcon color='sidish' />
+              </IconButton>
+            </div>}
+            <Login openLogin={openLogin} setOpenLogin={setOpenLogin} />
+          </div>
         </Toolbar>
       </MuiAppBar>
       <Drawer
@@ -92,7 +131,8 @@ function App() {
           {pages.map((value, index) => (
             <ListItem button onClick={handleDrawerClose} component={Link} to={setLink(value)} >
               <ListItemIcon>
-                {index === 0 && <PublishIcon color='fourth' />}
+                {index === 0 && <DirectionsBikeIcon color='fourth' />}
+                {index === 1 && <TourIcon color='fourth' />}
               </ListItemIcon>
               <ListItemText color='fourth' primary={value} />
             </ListItem>
@@ -100,9 +140,10 @@ function App() {
         </List>
         <Divider />
         <List>
-          {adminPages.map((value, index) => (
+          {additionalPages.map((value, index) => (
             <ListItem button onClick={handleDrawerClose} component={Link} to={setLink(value)} >
               <ListItemIcon>
+                {index === 0 && <PublishIcon color='fourth' />}
               </ListItemIcon>
               <ListItemText primary={value} />
             </ListItem>
@@ -112,6 +153,11 @@ function App() {
       <Main style={{ display: 'flex', flexDirection: 'column', backgroundColor: '#D7DEDC' }} >
         <DrawerHeader />
         <AppRoutes />
+        <Snackbar open={isAlert} autoHideDuration={3000} onClose={() => setIsAlert(false)}>
+          <Alert onClose={() => setIsAlert(false)} severity={alertType} sx={{ width: '100%' }}>
+            {alertMsg}
+          </Alert>
+        </Snackbar>
       </Main>
     </div>
   );

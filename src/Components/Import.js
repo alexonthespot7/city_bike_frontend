@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import { Button, CircularProgress, OutlinedInput, Stack } from '@mui/material';
 
@@ -8,6 +8,7 @@ import Cookies from 'js-cookie';
 import { motion } from 'framer-motion';
 
 import '../App.css';
+import AuthContext from '../context/AuthContext';
 
 const allowedExtensions = ["csv"];
 
@@ -15,6 +16,7 @@ function Import() {
     const [data, setData] = useState([]);
     const [file, setFile] = useState(null);
     const [loaded, setLoaded] = useState(true);
+    const { setIsAlert, setAlertType, setAlertMsg } = useContext(AuthContext);
 
     const handleFileChange = (event) => {
         if (event.target.files.length) {
@@ -22,16 +24,22 @@ function Import() {
 
             const fileExtension = inputFile?.type.split("/")[1];
             if (!allowedExtensions.includes(fileExtension)) {
-                alert("Please input a csv file");
+                setIsAlert(true);
+                setAlertType('info');
+                setAlertMsg('Please input csv file');
                 return;
             }
-
             setFile(inputFile);
         }
     }
 
     const importData = () => {
-        if (!file) return alert('There is no file');
+        if (!file) {
+            setIsAlert(true);
+            setAlertType('info');
+            setAlertMsg('There is no file');
+            return
+        }
         setLoaded(false);
         const reader = new FileReader();
 
@@ -42,7 +50,9 @@ function Import() {
                 setData(parsedData);
             } else if (Cookies.get('role') !== "ADMIN") {
                 setLoaded(true);
-                alert('Dataset size is too large for your role.');
+                setIsAlert(true);
+                setAlertType('error');
+                setAlertMsg('Dataset size is too large for your role');
             } else {
                 setData(parsedData);
             }
@@ -51,7 +61,7 @@ function Import() {
     }
 
     const sendJourneys = (localData) => {
-        fetch('http://localhost:8080/sendjourneys', {
+        fetch(`${process.env.REACT_APP_API_URL}/sendjourneys`, {
             method: 'POST',
             headers: Cookies.get('role') !== 'ADMIN' ? {
                 'Content-Type': 'application/json'
@@ -65,18 +75,24 @@ function Import() {
                 setLoaded(true);
                 setFile(null);
                 if (response.status === 200) {
-                    alert('OK');
+                    setIsAlert(true);
+                    setAlertType('success');
+                    setAlertMsg('Your data was added to database successfully');
                 } else if (response.status === 202) {
-                    alert('Not all rows were added.');
+                    setIsAlert(true);
+                    setAlertType('warning');
+                    setAlertMsg('Your data was added to database only partially');
                 } else {
-                    alert('Something went wrong during adding the book');
+                    setIsAlert(true);
+                    setAlertType('error');
+                    setAlertMsg('Something went wrong');
                 }
             })
             .catch(err => console.error(err));
     }
 
     const sendStations = (localData) => {
-        fetch('http://localhost:8080/sendstations', {
+        fetch(`${process.env.REACT_APP_API_URL}/sendstations`, {
             method: 'POST',
             headers: Cookies.get('role') !== 'ADMIN' ? {
                 'Content-Type': 'application/json'
@@ -90,9 +106,13 @@ function Import() {
                 setLoaded(true);
                 setFile(null);
                 if (response.ok) {
-                    alert('OK');
+                    setIsAlert(true);
+                    setAlertType('success');
+                    setAlertMsg('Your data was added to database successfully');
                 } else {
-                    alert('Something went wrong during adding the book');
+                    setIsAlert(true);
+                    setAlertType('error');
+                    setAlertMsg('Something went wrong');
                 }
             })
             .catch(err => console.error(err));
@@ -117,7 +137,9 @@ function Import() {
                 sendJourneys(localData);
             } else {
                 setLoaded(true);
-                alert('The dataset is unacceptable');
+                setIsAlert(true);
+                setAlertType('warning');
+                setAlertMsg('File isn\'t appropriate for data import');
             }
         }
     }, [data]);
@@ -129,12 +151,12 @@ function Import() {
             exit={{ opacity: 0 }}
         >
             {loaded && <Stack alignItems='center' marginTop='20vh' marginBottom='55vh' spacing={2} >
-                <div className='App'>{Cookies.get('role') === 'ADMIN' ? 'Please select csv file' : 'Please select csv file with no more than 500 rows.'}</div>
-                <OutlinedInput
-                    sx={{ width: '300px' }}
+                <div className='App' style={{ marginBottom: '10px' }}>{Cookies.get('role') === 'ADMIN' ? 'Please select csv file' : 'Please select csv file with no more than 500 rows.'}</div>
+                <input
                     color='thirdary'
                     type="file"
                     onChange={handleFileChange}
+                    accept=".csv"
                 />
                 <Button sx={{ width: '150px' }} color='fourth' variant='text' onClick={importData}>Import Data</Button>
             </Stack >}
