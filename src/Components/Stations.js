@@ -69,7 +69,7 @@ function Stations() {
         >
             <Typography variant='h5'>Stations</Typography>
             {dataFetched &&
-                <div className="ag-theme-material" style={{ height: 600, width: 920, margin: 'auto' }}>
+                <div className="ag-theme-material" style={{ height: 550, width: 920, margin: 'auto' }}>
                     <TextField
                         style={{ width: 920, marginBottom: 10 }}
                         type='search'

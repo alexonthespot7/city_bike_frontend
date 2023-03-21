@@ -2,6 +2,7 @@ import { AnimatePresence } from "framer-motion";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import Import from "../Components/Import";
 import Journeys from "../Components/Journeys";
+import SingleStation from "../Components/SingleStation";
 import Stations from "../Components/Stations";
 
 function AppRoutes() {
@@ -13,6 +14,7 @@ function AppRoutes() {
                 <Route path="/" element={<Journeys />} />
                 <Route path="/import" element={<Import />} />
                 <Route path="/stations" element={<Stations />} />
+                <Route path="/stations/:stationid" element={<SingleStation />} />
                 <Route
                     path="*"
                     element={

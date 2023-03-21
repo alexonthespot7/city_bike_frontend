@@ -45,7 +45,12 @@ function Import() {
 
         reader.onload = async ({ target }) => {
             const csv = Papa.parse(target.result, { header: true });
-            const parsedData = csv?.data;
+            const parsedData = csv?.data.filter((value, index) => {
+                const constValue = JSON.stringify(value);
+                return index === csv?.data.findIndex(obj => {
+                    return JSON.stringify(obj) === constValue;
+                });
+            });
             if (parsedData.length <= 501) {
                 setData(parsedData);
             } else if (Cookies.get('role') !== "ADMIN") {
@@ -124,7 +129,7 @@ function Import() {
             if (data[0].Kaupunki !== undefined) {
                 for (let i = 0; i < data.length - 1; i++) {
                     if (!isNaN(parseInt(data[i].ID))) {
-                        localData.push({ id: parseInt(data[i].ID), name: data[i].Name, address: data[i].Osoite, city: data[i].Kaupunki === 'Espoo' ? 'Espoo' : 'Helsinki', operator: data[i].Operaattor !== ' ' ? data[i].Operaattor : null, latitude: data[i].x, longitude: data[i].y });
+                        localData.push({ id: parseInt(data[i].ID), name: data[i].Name, address: data[i].Osoite, city: data[i].Kaupunki === 'Espoo' ? 'Espoo' : 'Helsinki', operator: data[i].Operaattor !== ' ' ? data[i].Operaattor : null, latitude: data[i].y, longitude: data[i].x });
                     }
                 }
                 sendStations(localData);
