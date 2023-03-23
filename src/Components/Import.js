@@ -45,12 +45,7 @@ function Import() {
 
         reader.onload = async ({ target }) => {
             const csv = Papa.parse(target.result, { header: true });
-            const parsedData = csv?.data.filter((value, index) => {
-                const constValue = JSON.stringify(value);
-                return index === csv?.data.findIndex(obj => {
-                    return JSON.stringify(obj) === constValue;
-                });
-            });
+            const parsedData = csv?.data;
             if (parsedData.length <= 501) {
                 setData(parsedData);
             } else if (Cookies.get('role') !== "ADMIN") {

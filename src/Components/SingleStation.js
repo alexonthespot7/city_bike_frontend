@@ -1,17 +1,32 @@
-import { CircularProgress, Divider, ListItem, ListItemText, Typography } from "@mui/material";
-import List from '@mui/material/List';
-import { useEffect, useState } from "react";
-
-import { motion } from 'framer-motion';
+import { useContext, useEffect, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";
 
+import { Button, CircularProgress, Divider, IconButton, ListItem, ListItemText, Typography } from "@mui/material";
+import List from '@mui/material/List';
+
+import FilterListIcon from '@mui/icons-material/FilterList';
+import FilterListOffIcon from '@mui/icons-material/FilterListOff';
+
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from "@mui/x-date-pickers";
+
+import { AnimatePresence, motion } from 'framer-motion';
+
 import MyMap from './MyMap.js';
+import AuthContext from "../context/AuthContext.js";
 
 function SingleStation() {
     const [station, setStation] = useState(null);
     const [dataFetched, setDataFetched] = useState(false);
     const [stationStats, setStationStats] = useState(null);
+    const [filteredStats, setFilteredStats] = useState(null);
+    const [date, setDate] = useState(null);
+    const [filter, setFilter] = useState(false);
+
+    const { setIsAlert, setAlertType, setAlertMsg } = useContext(AuthContext);
+
     let { stationid } = useParams();
 
     const navigate = useNavigate();
@@ -44,8 +59,48 @@ function SingleStation() {
 
     useEffect(() => {
         fetchStation();
-    }, []);
+    }, [date]);
 
+    const fetchFilterStats = () => {
+        fetch(process.env.REACT_APP_API_URL + '/stations/' + stationid + '/stats', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: date.toJSON()
+        })
+            .then(response => response.json())
+            .then(data => {
+                setFilteredStats(data);
+            })
+            .catch(err => console.error(err));
+    }
+
+    const getFilteredStat = () => {
+        if (date) {
+            fetchFilterStats();
+        } else {
+            setIsAlert(true);
+            setAlertMsg("Please select date before filtering");
+            setAlertType('info');
+        }
+    }
+
+    const distanceFormatter = (value) => {
+        return `${Math.floor(value / 1000)} km ${value % 1000} m`;
+    }
+
+    const changeFilter = () => {
+        if (filter) {
+            setFilteredStats(null);
+            setDate(null);
+        }
+        setFilter(!filter);
+    }
+
+    const navigateToStation = (id) => {
+        navigate('../stations/' + id);
+    }
 
     return (
         <motion.div
@@ -55,9 +110,31 @@ function SingleStation() {
         >
             {dataFetched &&
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 35, alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: -15 }}>
                         <Typography variant='h5' >Station {station.id}</Typography>
+                        <IconButton onClick={changeFilter}>{filter ? <FilterListOffIcon /> : <FilterListIcon />}</IconButton>
                     </div>
+                    <AnimatePresence>
+                        {filter &&
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0, height: 0 }}
+                                animate={{ opacity: 1, scale: 1, height: 'auto' }}
+                                exit={{ opacity: 0, scale: 0, height: 0 }}
+                                transition={{ duration: 1 }}
+                                style={{ display: 'flex', gap: 10, alignItems: 'center' }}
+                            >
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DatePicker
+                                        label="Choose month"
+                                        views={['month', 'year']}
+                                        value={date}
+                                        onChange={newValue => setDate(newValue)}
+                                    />
+                                </LocalizationProvider>
+                                <Button onClick={getFilteredStat} color='thirdary' variant='outlined'>Filter Stats</Button>
+                            </motion.div>
+                        }
+                    </AnimatePresence>
                     <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: '20vw', marginBottom: 15 }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 25 }}>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -74,12 +151,12 @@ function SingleStation() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 25 }}>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                                 <Typography textAlign='left' sx={{ marginBottom: 1 }} variant='h7' color='#778092' fontSize={14}>JOURNEYS STARTING FROM </Typography>
-                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={14} variant='h7'>{station.journeysFrom}</Typography>
+                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={14} variant='h7'>{(filteredStats ? filteredStats : stationStats).journeysFrom}</Typography>
                                 <Divider />
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                                 <Typography textAlign='left' sx={{ marginBottom: 1 }} variant='h7' color='#778092' fontSize={14}>JOURNEYS ENDING AT </Typography>
-                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={14} variant='h7'>{station.journeysTo}</Typography>
+                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={14} variant='h7'>{(filteredStats ? filteredStats : stationStats).journeysTo}</Typography>
                                 <Divider />
                             </div>
                         </div>
@@ -92,18 +169,18 @@ function SingleStation() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 25 }}>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                                 <Typography textAlign='left' sx={{ marginBottom: 1, maxWidth: 235, lineHeight: 1.5 }} variant='h7' color='#778092' fontSize={14}>THE AVERAGE DISTANCE OF A JOURNEY STARTING FROM </Typography>
-                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={14} variant='h7'>{`${Math.floor(stationStats.avgDistStartingFrom / 1000)} km ${stationStats.avgDistStartingFrom % 1000} m`}</Typography>
+                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={14} variant='h7'>{distanceFormatter((filteredStats ? filteredStats : stationStats).avgDistStartingFrom)}</Typography>
                                 <Divider />
                             </div>
-                            {stationStats.topPopReturnStations.length > 0 &&
+                            {(filteredStats ? filteredStats : stationStats).topPopReturnStations.length > 0 &&
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                     <Typography textAlign='left' sx={{ marginBottom: 1, maxWidth: 235, lineHeight: 1.5 }} variant='h7' color='#778092' fontSize={14}>TOP POPULAR RETURN STATIONS FOR JOURNEYS STARTING FROM </Typography>
                                     <List sx={{ maxWidth: 235 }}>
-                                        {stationStats.topPopReturnStations.map((value, index) => (
+                                        {(filteredStats ? filteredStats : stationStats).topPopReturnStations.map((value, index) => (
                                             <ListItem
                                                 key={index}
                                             >
-                                                <ListItemText primary={`${index + 1}. ${value.name}`} />
+                                                <ListItemText onClick={() => navigateToStation(value.id)} sx={{ cursor: 'pointer', "&:hover": { color: '#778092' }, transition: '0.4s' }} primary={`${index + 1}. ${value.name}`} />
                                             </ListItem>
                                         ))}
                                     </List>
@@ -113,18 +190,18 @@ function SingleStation() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 25 }}>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                                 <Typography textAlign='left' sx={{ marginBottom: 1, maxWidth: 235, lineHeight: 1.5 }} variant='h7' color='#778092' fontSize={14}>THE AVERAGE DISTANCE OF A JOURNEY ENDING AT </Typography>
-                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={14} variant='h7'>{`${Math.floor(stationStats.avgDistEndingAt / 1000)} km ${stationStats.avgDistEndingAt % 1000} m`}</Typography>
+                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={14} variant='h7'>{distanceFormatter((filteredStats ? filteredStats : stationStats).avgDistEndingAt)}</Typography>
                                 <Divider />
                             </div>
-                            {stationStats.topPopDepStations.length > 0 &&
+                            {(filteredStats ? filteredStats : stationStats).topPopDepStations.length > 0 &&
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                     <Typography textAlign='left' sx={{ marginBottom: 1, maxWidth: 235, lineHeight: 1.5 }} variant='h7' color='#778092' fontSize={14}>TOP POPULAR DEPARTURE STATIONS FOR JOURNEYS ENDING AT </Typography>
                                     <List sx={{ maxWidth: 235 }}>
-                                        {stationStats.topPopDepStations.map((value, index) => (
+                                        {(filteredStats ? filteredStats : stationStats).topPopDepStations.map((value, index) => (
                                             <ListItem
                                                 key={index}
                                             >
-                                                <ListItemText primary={`${index + 1}. ${value.name}`} />
+                                                <ListItemText onClick={() => navigateToStation(value.id)} sx={{ cursor: 'pointer', "&:hover": { color: '#778092' }, transition: '0.4s' }} primary={`${index + 1}. ${value.name}`} />
                                             </ListItem>
                                         ))}
                                     </List>

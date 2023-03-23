@@ -6,9 +6,11 @@ import { AgGridReact } from "ag-grid-react";
 import { CircularProgress, InputAdornment, TextField, Typography } from "@mui/material";
 
 import SearchIcon from '@mui/icons-material/Search';
+import LinkIcon from '@mui/icons-material/Link';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-material.css';
+import { Link } from "react-router-dom";
 
 function Journeys() {
     const [journeys, setJourneys] = useState([]);
@@ -39,8 +41,16 @@ function Journeys() {
     }
 
     const [columns, setColumns] = useState([
-        { headerName: 'Departure station', field: 'departureStation.name' },
-        { headerName: 'Return station', field: 'returnStation.name' },
+        {
+            headerName: 'Departure station',
+            cellRenderer: params => <Link style={{ color: '#050404' }} to={'../stations/' + params.data.departureStation.id} >{params.data.departureStation.name}</Link>,
+            type: 'stations'
+        },
+        {
+            headerName: 'Return station',
+            cellRenderer: params => <Link style={{ color: '#050404' }} to={'../stations/' + params.data.returnStation.id} >{params.data.returnStation.name}</Link>,
+            type: 'stations'
+        },
         {
             field: 'distance',
             type: 'narrow',
@@ -65,7 +75,8 @@ function Journeys() {
 
     const columnTypes = useMemo(() => {
         return {
-            narrow: { width: 190, filter: 'agNumberColumnFilter' }
+            narrow: { width: 190, filter: 'agNumberColumnFilter' },
+            stations: { cellStyle: {} }
         }
     }, []);
 

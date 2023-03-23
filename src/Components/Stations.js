@@ -3,13 +3,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from 'framer-motion';
 
 import { AgGridReact } from "ag-grid-react";
-import { CircularProgress, InputAdornment, TextField, Typography } from "@mui/material";
+import { CircularProgress, IconButton, InputAdornment, TextField, Typography } from "@mui/material";
 
 import SearchIcon from '@mui/icons-material/Search';
+import LinkIcon from '@mui/icons-material/Link';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-material.css';
 import '../App.css';
+import { useNavigate } from "react-router-dom";
 
 function Stations() {
     const [stations, setStations] = useState([]);
@@ -31,11 +33,20 @@ function Stations() {
         fetchStations();
     }, []);
 
+    const navigate = useNavigate();
+
     const [columns, setColumns] = useState([
         { field: 'name', type: 'wide' },
         { field: 'address', type: 'wide' },
-        { field: 'city' },
-        { field: 'operator' }
+        { field: 'city', type: 'city' },
+        { field: 'operator' },
+        {
+            headerName: 'Station Page',
+            cellRenderer: params => <IconButton onClick={() => navigate(`/stations/${params.data.id}`)}><LinkIcon color="primary" /></IconButton>,
+            filter: false,
+            sortable: false,
+            type: 'link'
+        }
     ]);
 
     const defaultColDef = useMemo(() => {
@@ -50,7 +61,9 @@ function Stations() {
 
     const columnTypes = useMemo(() => {
         return {
-            wide: { width: 300 }
+            wide: { width: 300 },
+            link: { width: 125 },
+            city: { width: 120 }
         }
     }, []);
 
@@ -69,9 +82,9 @@ function Stations() {
         >
             <Typography variant='h5'>Stations</Typography>
             {dataFetched &&
-                <div className="ag-theme-material" style={{ height: 550, width: 920, margin: 'auto' }}>
+                <div className="ag-theme-material" style={{ height: 550, width: '80%', maxWidth: 1015, margin: 'auto' }}>
                     <TextField
-                        style={{ width: 920, marginBottom: 10 }}
+                        style={{ width: '100%', maxWidth: 1015, marginBottom: 10 }}
                         type='search'
                         fullWidth={false}
                         size='small'
@@ -102,7 +115,7 @@ function Stations() {
             }
             {!dataFetched && <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', marginTop: '20vh', marginBottom: '55vh' }}><CircularProgress color="fourth" /></div>}
         </motion.div >
-    )
+    );
 }
 
 export default Stations;
