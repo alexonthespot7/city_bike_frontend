@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css?family=Raleway');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+
+.FooterContainer {
+    padding: 70px 0 0 0;
+    font-family: "Raleway";
+    font-size: 12pt;
+    color: #fff;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.Media {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+}
+
+.SocialLink {
+    background: #050404;
+    cursor: pointer;
+    height: 55px;
+    width: 55px;
+    transition: 0.5s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.SocialLink:hover {
+    background: #08605F;
+}
+
+.FooterInfo {
+    color: #7D6F86;
+    font-size: 10pt;
+    margin-top: 30px;
+    opacity: 0.6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.Year {
+    margin-left: 5px;
+    font-family: "Open Sans";
+}
+
+@media (max-width:350px) {
+    .FooterContainer {
+        padding: 50px 0 0px 0;
+    }
+
+    .Media {
+        gap: 24px;
+    }
+
+    .SocialLink {
+        height: 44px;
+        width: 44px;
+    }
+
+    .FooterInfo {
+        font-size: 8pt;
+        margin-top: 20px;
+    }
+
+    .Year {
+        margin-left: 5px;
+    }
+}

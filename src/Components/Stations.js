@@ -12,10 +12,13 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-material.css';
 import '../App.css';
 import { useNavigate } from "react-router-dom";
+import useMediaQuery from "../Hooks/useMediaQuery";
 
 function Stations() {
     const [stations, setStations] = useState([]);
     const [dataFetched, setDataFetched] = useState(false);
+
+    const matchesM = useMediaQuery("(min-width: 650px)");
 
     const gridRef = useRef();
 
@@ -78,9 +81,9 @@ function Stations() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            style={{ display: 'flex', flexDirection: 'column', gap: 15, alignItems: 'center', justifyContent: 'center' }}
+            style={{ display: 'flex', flexDirection: 'column', marginBottom: 40, gap: 15, alignItems: 'center', justifyContent: 'center' }}
         >
-            <Typography variant='h5'>Stations</Typography>
+            <Typography variant={matchesM ? 'h5' : 'h6'}>Stations</Typography>
             {dataFetched &&
                 <div className="ag-theme-material" style={{ height: 550, width: '80%', maxWidth: 1015, margin: 'auto' }}>
                     <TextField

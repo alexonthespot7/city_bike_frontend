@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";
 
-import { Button, CircularProgress, Divider, IconButton, ListItem, ListItemText, Typography } from "@mui/material";
+import { Button, CircularProgress, Divider, IconButton, ListItem, ListItemText, TextField, Typography } from "@mui/material";
 import List from '@mui/material/List';
 
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -16,6 +16,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import MyMap from './MyMap.js';
 import AuthContext from "../context/AuthContext.js";
+import useMediaQuery from "../Hooks/useMediaQuery.js";
 
 function SingleStation() {
     const [station, setStation] = useState(null);
@@ -26,6 +27,9 @@ function SingleStation() {
     const [filter, setFilter] = useState(false);
 
     const { setIsAlert, setAlertType, setAlertMsg } = useContext(AuthContext);
+
+    const matchesM = useMediaQuery("(min-width: 650px)");
+    const matchesM1 = useMediaQuery("(min-width: 500px)");
 
     let { stationid } = useParams();
 
@@ -111,8 +115,8 @@ function SingleStation() {
             {dataFetched &&
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 35, alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: -15 }}>
-                        <Typography variant='h5' >Station {station.id}</Typography>
-                        <IconButton onClick={changeFilter}>{filter ? <FilterListOffIcon /> : <FilterListIcon />}</IconButton>
+                        <Typography variant={matchesM ? 'h5' : 'h6'} >Station {station.id}</Typography>
+                        <IconButton size={matchesM ? 'medium' : 'small'} onClick={changeFilter}>{filter ? <FilterListOffIcon /> : <FilterListIcon />}</IconButton>
                     </div>
                     <AnimatePresence>
                         {filter &&
@@ -121,7 +125,7 @@ function SingleStation() {
                                 animate={{ opacity: 1, scale: 1, height: 'auto' }}
                                 exit={{ opacity: 0, scale: 0, height: 0 }}
                                 transition={{ duration: 1 }}
-                                style={{ display: 'flex', gap: 10, alignItems: 'center' }}
+                                style={{ display: 'flex', gap: 10, alignItems: 'center', flexDirection: matchesM1 ? 'row' : 'column' }}
                             >
                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                                     <DatePicker
@@ -135,46 +139,46 @@ function SingleStation() {
                             </motion.div>
                         }
                     </AnimatePresence>
-                    <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: '20vw', marginBottom: 15 }}>
+                    <div style={{ display: 'flex', flexDirection: matchesM ? 'row' : 'column', justifyContent: 'center', gap: matchesM ? '20vw' : 25, marginBottom: 15 }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 25 }}>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <Typography textAlign='left' sx={{ marginBottom: 1 }} variant='h7' color='#778092' fontSize={14}>NAME </Typography>
-                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={14} variant='h7'>{station.name}</Typography>
+                                <Typography textAlign='left' sx={{ marginBottom: 1 }} variant='h7' color='#778092' fontSize={matchesM ? 14 : 12}>NAME </Typography>
+                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={matchesM ? 14 : 12} variant='h7'>{station.name}</Typography>
                                 <Divider />
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <Typography textAlign='left' sx={{ marginBottom: 1 }} variant='h7' color='#778092' fontSize={14}>ADDRESS </Typography>
-                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={14} variant='h7'>{station.address}</Typography>
+                                <Typography textAlign='left' sx={{ marginBottom: 1 }} variant='h7' color='#778092' fontSize={matchesM ? 14 : 12}>ADDRESS </Typography>
+                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={matchesM ? 14 : 12} variant='h7'>{station.address}</Typography>
                                 <Divider />
                             </div>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 25 }}>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <Typography textAlign='left' sx={{ marginBottom: 1 }} variant='h7' color='#778092' fontSize={14}>JOURNEYS STARTING FROM </Typography>
-                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={14} variant='h7'>{(filteredStats ? filteredStats : stationStats).journeysFrom}</Typography>
+                                <Typography textAlign='left' sx={{ marginBottom: 1 }} variant='h7' color='#778092' fontSize={matchesM ? 14 : 12}>JOURNEYS STARTING FROM </Typography>
+                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={matchesM ? 14 : 12} variant='h7'>{(filteredStats ? filteredStats : stationStats).journeysFrom}</Typography>
                                 <Divider />
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <Typography textAlign='left' sx={{ marginBottom: 1 }} variant='h7' color='#778092' fontSize={14}>JOURNEYS ENDING AT </Typography>
-                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={14} variant='h7'>{(filteredStats ? filteredStats : stationStats).journeysTo}</Typography>
+                                <Typography textAlign='left' sx={{ marginBottom: 1 }} variant='h7' color='#778092' fontSize={matchesM ? 14 : 12}>JOURNEYS ENDING AT </Typography>
+                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={matchesM ? 14 : 12} variant='h7'>{(filteredStats ? filteredStats : stationStats).journeysTo}</Typography>
                                 <Divider />
                             </div>
                         </div>
                     </div>
                     <MyMap coordinates={{ lat: parseFloat(station.latitude), lng: parseFloat(station.longitude) }} />
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <Typography variant='h5' fontSize={20} >Station Statistics</Typography>
+                        <Typography variant='h5' fontSize={matchesM ? 20 : 17} >Station Statistics</Typography>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: '20vw', marginBottom: 15 }}>
+                    <div style={{ display: 'flex', flexDirection: matchesM ? 'row' : 'column', justifyContent: 'center', gap: matchesM ? '20vw' : 25, marginBottom: 15 }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 25 }}>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <Typography textAlign='left' sx={{ marginBottom: 1, maxWidth: 235, lineHeight: 1.5 }} variant='h7' color='#778092' fontSize={14}>THE AVERAGE DISTANCE OF A JOURNEY STARTING FROM </Typography>
-                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={14} variant='h7'>{distanceFormatter((filteredStats ? filteredStats : stationStats).avgDistStartingFrom)}</Typography>
+                                <Typography textAlign='left' sx={{ marginBottom: 1, maxWidth: 235, lineHeight: 1.5 }} variant='h7' color='#778092' fontSize={matchesM ? 14 : 12}>THE AVERAGE DISTANCE OF A JOURNEY STARTING FROM </Typography>
+                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={matchesM ? 14 : 12} variant='h7'>{distanceFormatter((filteredStats ? filteredStats : stationStats).avgDistStartingFrom)}</Typography>
                                 <Divider />
                             </div>
                             {(filteredStats ? filteredStats : stationStats).topPopReturnStations.length > 0 &&
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <Typography textAlign='left' sx={{ marginBottom: 1, maxWidth: 235, lineHeight: 1.5 }} variant='h7' color='#778092' fontSize={14}>TOP POPULAR RETURN STATIONS FOR JOURNEYS STARTING FROM </Typography>
+                                    <Typography textAlign='left' sx={{ marginBottom: 1, maxWidth: 235, lineHeight: 1.5 }} variant='h7' color='#778092' fontSize={matchesM ? 14 : 12}>TOP POPULAR RETURN STATIONS FOR JOURNEYS STARTING FROM </Typography>
                                     <List sx={{ maxWidth: 235 }}>
                                         {(filteredStats ? filteredStats : stationStats).topPopReturnStations.map((value, index) => (
                                             <ListItem
@@ -189,13 +193,13 @@ function SingleStation() {
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 25 }}>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <Typography textAlign='left' sx={{ marginBottom: 1, maxWidth: 235, lineHeight: 1.5 }} variant='h7' color='#778092' fontSize={14}>THE AVERAGE DISTANCE OF A JOURNEY ENDING AT </Typography>
-                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={14} variant='h7'>{distanceFormatter((filteredStats ? filteredStats : stationStats).avgDistEndingAt)}</Typography>
+                                <Typography textAlign='left' sx={{ marginBottom: 1, maxWidth: 235, lineHeight: 1.5 }} variant='h7' color='#778092' fontSize={matchesM ? 14 : 12}>THE AVERAGE DISTANCE OF A JOURNEY ENDING AT </Typography>
+                                <Typography textAlign='left' noWrap sx={{ minWidth: 235, maxWidth: 235, marginBottom: 0.5 }} fontWeight='bold' fontSize={matchesM ? 14 : 12} variant='h7'>{distanceFormatter((filteredStats ? filteredStats : stationStats).avgDistEndingAt)}</Typography>
                                 <Divider />
                             </div>
                             {(filteredStats ? filteredStats : stationStats).topPopDepStations.length > 0 &&
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <Typography textAlign='left' sx={{ marginBottom: 1, maxWidth: 235, lineHeight: 1.5 }} variant='h7' color='#778092' fontSize={14}>TOP POPULAR DEPARTURE STATIONS FOR JOURNEYS ENDING AT </Typography>
+                                    <Typography textAlign='left' sx={{ marginBottom: 1, maxWidth: 235, lineHeight: 1.5 }} variant='h7' color='#778092' fontSize={matchesM ? 14 : 12}>TOP POPULAR DEPARTURE STATIONS FOR JOURNEYS ENDING AT </Typography>
                                     <List sx={{ maxWidth: 235 }}>
                                         {(filteredStats ? filteredStats : stationStats).topPopDepStations.map((value, index) => (
                                             <ListItem

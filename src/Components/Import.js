@@ -130,8 +130,8 @@ function Import() {
                 sendStations(localData);
             } else if (data[0].Departure !== undefined) {
                 for (let i = 0; i < data.length; i++) {
-                    if (data[i]['Duration (sec.)'] >= 10 && data[i]['Covered distance (m)'] >= 10 && !isNaN(parseInt(data[i]['Departure station id'])) && !isNaN(parseInt(data[i]['Return station id']))) {
-                        localData.push({ distance: !isNaN(parseInt(data[i]['Covered distance (m)'])) ? parseInt(data[i]['Covered distance (m)']) : null, departureTime: data[i].Departure, departureStationId: parseInt(data[i]['Departure station id']), returnTime: data[i].Return, returnStationId: parseInt(data[i]['Return station id']), duration: !isNaN(parseInt(data[i]['Duration (sec.)'])) ? parseInt(data[i]['Duration (sec.)']) : null });
+                    if (data[i]['Duration (sec.)'] >= 10 && data[i]['Covered distance (m)'] >= 10 && !isNaN(parseInt(data[i]['Departure station id'])) && !isNaN(parseInt(data[i]['Return station id'])) && !isNaN(parseInt(data[i]['Covered distance (m)'])) && !isNaN(parseInt(data[i]['Duration (sec.)']))) {
+                        localData.push({ distance: parseInt(Math.round(data[i]['Covered distance (m)'])), departureTime: data[i].Departure, departureStationId: parseInt(data[i]['Departure station id']), returnTime: data[i].Return, returnStationId: parseInt(data[i]['Return station id']), duration: parseInt(data[i]['Duration (sec.)']) });
                     }
                 }
                 sendJourneys(localData);
@@ -150,16 +150,18 @@ function Import() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
         >
-            {loaded && <Stack alignItems='center' marginTop='20vh' marginBottom='55vh' spacing={2} >
-                <div className='App' style={{ marginBottom: '10px' }}>{Cookies.get('role') === 'ADMIN' ? 'Please select csv file' : 'Please select csv file with no more than 500 rows.'}</div>
-                <input
-                    color='thirdary'
-                    type="file"
-                    onChange={handleFileChange}
-                    accept=".csv"
-                />
-                <Button sx={{ width: '150px' }} color='fourth' variant='text' onClick={importData}>Import Data</Button>
-            </Stack >}
+            {loaded &&
+                <Stack alignItems='center' marginTop='20vh' marginBottom='27vh' spacing={2} >
+                    <div className='App' style={{ marginBottom: '10px' }}>{Cookies.get('role') === 'ADMIN' ? 'Please select csv file' : 'Please select csv file with no more than 500 rows.'}</div>
+                    <input
+                        color='thirdary'
+                        type="file"
+                        onChange={handleFileChange}
+                        accept=".csv"
+                    />
+                    <Button sx={{ width: '150px' }} color='fourth' variant='text' onClick={importData}>Import Data</Button>
+                </Stack >
+            }
             {!loaded && <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', marginTop: '20vh', marginBottom: '55vh' }}><CircularProgress color="fourth" /></div>}
         </motion.div>
     );

@@ -6,15 +6,17 @@ import { AgGridReact } from "ag-grid-react";
 import { CircularProgress, InputAdornment, TextField, Typography } from "@mui/material";
 
 import SearchIcon from '@mui/icons-material/Search';
-import LinkIcon from '@mui/icons-material/Link';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-material.css';
 import { Link } from "react-router-dom";
+import useMediaQuery from "../Hooks/useMediaQuery";
 
 function Journeys() {
     const [journeys, setJourneys] = useState([]);
     const [dataFetched, setDataFetched] = useState(false);
+
+    const matchesM = useMediaQuery("(min-width: 650px)");
 
     const gridRef = useRef();
 
@@ -44,11 +46,13 @@ function Journeys() {
         {
             headerName: 'Departure station',
             cellRenderer: params => <Link style={{ color: '#050404' }} to={'../stations/' + params.data.departureStation.id} >{params.data.departureStation.name}</Link>,
+            field: 'departureStation.name',
             type: 'stations'
         },
         {
             headerName: 'Return station',
             cellRenderer: params => <Link style={{ color: '#050404' }} to={'../stations/' + params.data.returnStation.id} >{params.data.returnStation.name}</Link>,
+            field: 'returnStation.name',
             type: 'stations'
         },
         {
@@ -93,9 +97,9 @@ function Journeys() {
             exit={{ opacity: 0 }}
             style={{ display: 'flex', flexDirection: 'column', gap: 15, alignItems: 'center', justifyContent: 'center' }}
         >
-            <Typography variant='h5'>Journeys</Typography>
+            <Typography variant={matchesM ? 'h5' : 'h6'}>Journeys</Typography>
             {dataFetched &&
-                <div className="ag-theme-material" style={{ height: 600, width: 1000, margin: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div className="ag-theme-material" style={{ height: 600, width: '80%', maxWidth: 1000, margin: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
                     <TextField
                         type='search'
                         fullWidth={false}

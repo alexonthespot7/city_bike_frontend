@@ -12,9 +12,8 @@ const Marker = () => <RoomIcon
 />;
 
 export default function SimpleMap({ coordinates }) {
-
     return (
-        <div style={{ height: '80vh', width: '70%', margin: 'auto', maxWidth: 900 }}>
+        <div style={{ height: '80vh', width: '70%', minWidth: 235, margin: 'auto', maxWidth: 900 }}>
             <GoogleMapReact
                 bootstrapURLKeys={{ key: "AIzaSyDsaFC1kMaY_1AWL_e2cdNsidfhlZZgDcg" }}
                 defaultCenter={coordinates}

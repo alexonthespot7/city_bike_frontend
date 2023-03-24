@@ -1,4 +1,9 @@
 import { Button, Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Snackbar, Toolbar, Typography } from '@mui/material';
+import MuiAppBar from '@mui/material/AppBar';
+import MuiAlert from '@mui/material/Alert';
+
+import styled from '@emotion/styled';
+
 import { forwardRef, useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -10,14 +15,14 @@ import MenuIcon from '@mui/icons-material/Menu';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 
-import MuiAppBar from '@mui/material/AppBar';
-import MuiAlert from '@mui/material/Alert';
+import Cookies from 'js-cookie';
 
 import AppRoutes from './Routes/AppRoutes';
-import styled from '@emotion/styled';
 import AuthContext from './context/AuthContext';
 import Login from './Components/Login';
-import Cookies from 'js-cookie';
+import MyFooter from './Components/MyFooter';
+
+import useMediaQuery from './Hooks/useMediaQuery';
 
 const Alert = forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -49,6 +54,10 @@ function App() {
 
   const { isAlert, setIsAlert, alertType, setAlertType, alertMsg, setAlertMsg } = useContext(AuthContext);
 
+  const matchesM0 = useMediaQuery("(min-width: 650px)");
+  const matchesM = useMediaQuery("(min-width: 500px)");
+  const matchesS = useMediaQuery("(min-width: 400px)");
+
   const handleDrawerOpen = () => {
     setDrawerOpen(true);
   }
@@ -66,6 +75,7 @@ function App() {
       return '/stations';
     }
   }
+
   const navigate = useNavigate();
 
   const logOff = () => {
@@ -79,7 +89,7 @@ function App() {
     <div>
       <MuiAppBar position="fixed" color='thirdary'>
         <Toolbar style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
-          <div style={{ position: 'absolute', left: 25, display: 'flex', alignItems: 'center' }}>
+          <div style={{ position: 'absolute', left: matchesS ? 25 : 10, display: 'flex', alignItems: 'center' }}>
             <IconButton
               color="inherit"
               aria-label="open drawer"
@@ -90,15 +100,19 @@ function App() {
               <MenuIcon />
             </IconButton>
           </div>
-          <Typography onClick={() => navigate("/")} style={{ cursor: 'pointer' }} variant='h5' component="div">
+          <Typography onClick={() => navigate("/")} style={{ cursor: 'pointer' }} variant={matchesM0 ? 'h5' : 'h6'} component="div">
             City Bike
           </Typography>
-          <div style={{ position: 'absolute', right: 25 }}>
-            {(Cookies.get('username') === undefined) && <Button size='medium' onClick={() => setOpenLogin(true)} startIcon={<LoginIcon />} color="inherit">
+          <div style={{ position: 'absolute', right: matchesS ? 25 : 10 }}>
+            {(Cookies.get('username') === undefined && matchesM) && <Button size='medium' onClick={() => setOpenLogin(true)} startIcon={<LoginIcon />} color="inherit">
               Login
             </Button>}
+            {(Cookies.get('username') === undefined && !matchesM) &&
+              <IconButton size='small' onClick={() => setOpenLogin(true)}>
+                <LoginIcon color='sidish' />
+              </IconButton>}
             {(Cookies.get('username') !== undefined) && <div style={{ display: 'flex', gap: 10 }}>
-              <Typography variant='h6'>{Cookies.get('username')}</Typography>
+              {matchesM && <Typography variant='h6'>{Cookies.get('username')}</Typography>}
               <IconButton size='small' onClick={logOff}>
                 <LogoutIcon color='sidish' />
               </IconButton>
@@ -153,6 +167,7 @@ function App() {
       <Main style={{ display: 'flex', flexDirection: 'column', backgroundColor: '#D7DEDC' }} >
         <DrawerHeader />
         <AppRoutes />
+        <MyFooter />
         <Snackbar open={isAlert} autoHideDuration={3000} onClose={() => setIsAlert(false)}>
           <Alert onClose={() => setIsAlert(false)} severity={alertType} sx={{ width: '100%' }}>
             {alertMsg}
