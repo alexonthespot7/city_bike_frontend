@@ -3,20 +3,20 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from 'framer-motion';
 
 import { AgGridReact } from "ag-grid-react";
-import { CircularProgress, InputAdornment, TextField, Typography } from "@mui/material";
-
-import SearchIcon from '@mui/icons-material/Search';
+import { CircularProgress, Typography } from "@mui/material";
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-material.css';
 import { Link } from "react-router-dom";
 import useMediaQuery from "../Hooks/useMediaQuery";
+import AddJourney from "./AddJourney";
 
 function Journeys() {
     const [dataFetched, setDataFetched] = useState(false);
     const [gridApi, setGridApi] = useState(null);
 
     const matchesM = useMediaQuery("(min-width: 650px)");
+    const matchesS = useMediaQuery("(min-width: 330px)");
 
     const gridRef = useRef();
 
@@ -135,7 +135,10 @@ function Journeys() {
             exit={{ opacity: 0 }}
             style={{ display: 'flex', flexDirection: 'column', gap: 15, alignItems: 'center', justifyContent: 'center' }}
         >
-            <Typography variant={matchesM ? 'h5' : 'h6'}>Journeys</Typography>
+            <div style={{ display: 'flex', gap: matchesS ? 40 : 15, flexDirection: matchesS ? 'row' : 'column' }}>
+                <Typography variant={matchesM ? 'h5' : 'h6'}>Journeys</Typography>
+                <AddJourney />
+            </div>
             <div className="ag-theme-material" style={{ height: 600, width: '80%', maxWidth: 1000, margin: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <AgGridReact
                     ref={gridRef}

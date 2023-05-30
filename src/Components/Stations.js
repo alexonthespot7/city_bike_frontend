@@ -13,12 +13,15 @@ import 'ag-grid-community/styles/ag-theme-material.css';
 import '../App.css';
 import { useNavigate } from "react-router-dom";
 import useMediaQuery from "../Hooks/useMediaQuery";
+import AddStation from "./AddStation";
+import Cookies from "js-cookie";
 
 function Stations() {
     const [stations, setStations] = useState([]);
     const [dataFetched, setDataFetched] = useState(false);
 
     const matchesM = useMediaQuery("(min-width: 650px)");
+    const matchesS = useMediaQuery("(min-width: 330px)");
 
     const gridRef = useRef();
 
@@ -83,7 +86,10 @@ function Stations() {
             exit={{ opacity: 0 }}
             style={{ display: 'flex', flexDirection: 'column', marginBottom: 40, gap: 15, alignItems: 'center', justifyContent: 'center' }}
         >
-            <Typography variant={matchesM ? 'h5' : 'h6'}>Stations</Typography>
+            <div style={{ display: 'flex', gap: matchesS ? 40 : 15, flexDirection: matchesS ? 'row' : 'column' }}>
+                <Typography variant={matchesM ? 'h5' : 'h6'}>Stations</Typography>
+                {(Cookies.get('role') === 'ADMIN') && <AddStation />}
+            </div>
             {dataFetched &&
                 <div className="ag-theme-material" style={{ height: 550, width: '80%', maxWidth: 1015, margin: 'auto' }}>
                     <TextField
