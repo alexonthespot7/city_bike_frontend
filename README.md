@@ -1,3 +1,9 @@
+# Deployment:
+## Back-end github repo:
+  https://github.com/alexonthespot7/city_bike_backend
+## Deployed front-end:
+  https://city-bike-frontend.netlify.app
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
